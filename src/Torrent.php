@@ -2,6 +2,7 @@
 
 namespace League\Torrent;
 
+use League\Torrent\Helper\Decoder;
 use League\Torrent\Helper\Encoder;
 use League\Torrent\Helper\FileSystem;
 
@@ -324,7 +325,7 @@ class Torrent
                     continue;
                 }
                 $data = curl_multi_getcontent($done['handle']);
-                $stats = self::decode_data($data);
+                $stats = Decoder::decode_data($data);
                 curl_multi_remove_handle($curl, $done['handle']);
                 $scrape[$tracker] = empty($stats['files']) ?
                     self::set_error(new Exception('Empty scrape data'), true) :
@@ -368,125 +369,7 @@ class Torrent
         $data = is_file($string) || FileSystem::url_exists($string) ?
             self::file_get_contents($string) :
             $string;
-        return (array) self::decode_data($data);
-    }
-
-    /**
-     * @param $data
-     *
-     * @return array|bool|int|string
-     */
-    private static function decode_data(& $data)
-    {
-        switch (FileSystem::char($data)) {
-            case 'i':
-                $data = substr($data, 1);
-                return self::decode_integer($data);
-            case 'l':
-                $data = substr($data, 1);
-                return self::decode_list($data);
-            case 'd':
-                $data = substr($data, 1);
-                return self::decode_dictionary($data);
-            default:
-                return self::decode_string($data);
-        }
-    }
-
-    /**
-     * @param $data
-     *
-     * @return array|bool
-     */
-    private static function decode_dictionary(& $data)
-    {
-        $dictionary = array();
-        $previous = null;
-        while (($char = FileSystem::char($data)) != 'e') {
-            if ($char === false) {
-                return self::set_error(new Exception('Unterminated dictionary'));
-            }
-            if (!ctype_digit($char)) {
-                return self::set_error(new Exception('Invalid dictionary key'));
-            }
-            $key = self::decode_string($data);
-            if (isset($dictionary[$key])) {
-                return self::set_error(new Exception('Duplicate dictionary key'));
-            }
-            if ($key < $previous) {
-                return self::set_error(new Exception('Missorted dictionary key'));
-            }
-            $dictionary[$key] = self::decode_data($data);
-            $previous = $key;
-        }
-        $data = substr($data, 1);
-        return $dictionary;
-    }
-
-    /**
-     * @param $data
-     *
-     * @return array|bool
-     */
-    private static function decode_list(& $data)
-    {
-        $list = array();
-        while (($char = FileSystem::char($data)) != 'e') {
-            if ($char === false) {
-                return self::set_error(new Exception('Unterminated list'));
-            }
-            $list[] = self::decode_data($data);
-        }
-        $data = substr($data, 1);
-        return $list;
-    }
-
-    /**
-     * @param $data
-     *
-     * @return bool|string
-     */
-    private static function decode_string(& $data)
-    {
-        if (FileSystem::char($data) === '0' && substr($data, 1, 1) != ':') {
-            self::set_error(new Exception('Invalid string length, leading zero'));
-        }
-        if (!$colon = @strpos($data, ':')) {
-            return self::set_error(new Exception('Invalid string length, colon not found'));
-        }
-        $length = intval(substr($data, 0, $colon));
-        if ($length + $colon + 1 > strlen($data)) {
-            return self::set_error(new Exception('Invalid string, input too short for string length'));
-        }
-        $string = substr($data, $colon + 1, $length);
-        $data = substr($data, $colon + $length + 1);
-        return $string;
-    }
-
-    /**
-     * @param $data
-     *
-     * @return int
-     */
-    private static function decode_integer(& $data)
-    {
-        $start = 0;
-        $end = strpos($data, 'e');
-        if ($end === 0) {
-            self::set_error(new Exception('Empty integer'));
-        }
-        if (FileSystem::char($data) == '-') {
-            $start++;
-        }
-        if (substr($data, $start, 1) == '0' && $end > $start + 1) {
-            self::set_error(new Exception('Leading zero in integer'));
-        }
-        if (!ctype_digit(substr($data, $start, $start ? $end - 1 : $end))) {
-            self::set_error(new Exception('Non-digit characters in integer'));
-        }
-        $integer = substr($data, 0, $end);
-        $data = substr($data, $end + 1);
-        return 0 + $integer;
+        return (array) Decoder::decode_data($data);
     }
 
     /**

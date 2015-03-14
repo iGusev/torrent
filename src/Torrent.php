@@ -2,6 +2,7 @@
 
 namespace League\Torrent;
 
+use League\Torrent\Helper\Encoder;
 use League\Torrent\Helper\FileSystem;
 
 /**
@@ -68,7 +69,7 @@ class Torrent
      */
     public function __toString()
     {
-        return $this->encode($this);
+        return Encoder::encode($this);
     }
 
     /**
@@ -198,7 +199,7 @@ class Torrent
     public function hash_info()
     {
         return isset($this->info) ?
-            sha1(self::encode($this->info)) :
+            sha1(Encoder::encode($this->info)) :
             null;
     }
 
@@ -342,7 +343,7 @@ class Torrent
     public function save($filename = null)
     {
         return file_put_contents(is_null($filename) ? $this->info['name'] . '.torrent' : $filename,
-            $this->encode($this));
+            Encoder::encode($this));
     }
 
     /**

@@ -7,6 +7,13 @@ class Torrent
 
     const timeout = 30;
 
+    /**
+     * Optional comment
+     *
+     * @var string
+     */
+    protected $comment;
+
     static protected $_errors = array();
 
     public function __construct($data = null, $meta = array(), $piece_length = 256)

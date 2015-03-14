@@ -4,9 +4,17 @@ namespace League\Torrent;
 
 use League\Torrent\Helper\FileSystem;
 
+/**
+ * Class Torrent
+ *
+ * @package League\Torrent
+ */
 class Torrent
 {
 
+    /**
+     *
+     */
     const timeout = 30;
 
     /**
@@ -23,8 +31,16 @@ class Torrent
      */
     protected $info;
 
+    /**
+     * @var array
+     */
     protected static $_errors = array();
 
+    /**
+     * @param null $data
+     * @param array $meta
+     * @param int $piece_length
+     */
     public function __construct($data = null, $meta = array(), $piece_length = 256)
     {
         if (is_null($data)) {
@@ -46,11 +62,17 @@ class Torrent
         }
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->encode($this);
     }
 
+    /**
+     * @return bool
+     */
     public function error()
     {
         return empty(self::$_errors) ?
@@ -58,6 +80,9 @@ class Torrent
             self::$_errors[0]->getMessage();
     }
 
+    /**
+     * @return array|bool
+     */
     public function errors()
     {
         return empty(self::$_errors) ?
@@ -65,6 +90,11 @@ class Torrent
             self::$_errors;
     }
 
+    /**
+     * @param null $announce
+     *
+     * @return array|mixed|null|string
+     */
     public function announce($announce = null)
     {
         if (is_null($announce)) {
@@ -91,6 +121,11 @@ class Torrent
         unset($this->announce);
     }
 
+    /**
+     * @param null $comment
+     *
+     * @return null|string
+     */
     public function comment($comment = null)
     {
         return is_null($comment) ?
@@ -98,6 +133,11 @@ class Torrent
             $this->touch($this->comment = (string) $comment);
     }
 
+    /**
+     * @param null $name
+     *
+     * @return null
+     */
     public function name($name = null)
     {
         return is_null($name) ?
@@ -105,6 +145,11 @@ class Torrent
             $this->touch($this->info['name'] = (string) $name);
     }
 
+    /**
+     * @param null $private
+     *
+     * @return bool|null
+     */
     public function is_private($private = null)
     {
         return is_null($private) ?
@@ -112,6 +157,11 @@ class Torrent
             $this->touch($this->info['private'] = $private ? 1 : 0);
     }
 
+    /**
+     * @param null $urls
+     *
+     * @return null
+     */
     public function url_list($urls = null)
     {
         return is_null($urls) ?
@@ -119,6 +169,11 @@ class Torrent
             $this->touch($this->{'url-list'} = is_string($urls) ? $urls : (array) $urls);
     }
 
+    /**
+     * @param null $urls
+     *
+     * @return null
+     */
     public function httpseeds($urls = null)
     {
         return is_null($urls) ?
@@ -126,6 +181,9 @@ class Torrent
             $this->touch($this->httpseeds = (array) $urls);
     }
 
+    /**
+     * @return null
+     */
     public function piece_length()
     {
         return isset($this->info['piece length']) ?
@@ -133,6 +191,9 @@ class Torrent
             null;
     }
 
+    /**
+     * @return null|string
+     */
     public function hash_info()
     {
         return isset($this->info) ?
@@ -140,6 +201,11 @@ class Torrent
             null;
     }
 
+    /**
+     * @param null $precision
+     *
+     * @return array
+     */
     public function content($precision = null)
     {
         $files = array();
@@ -157,6 +223,9 @@ class Torrent
         return $files;
     }
 
+    /**
+     * @return array
+     */
     public function offset()
     {
         $files = array();
@@ -181,6 +250,11 @@ class Torrent
         return $files;
     }
 
+    /**
+     * @param null $precision
+     *
+     * @return int|string
+     */
     public function size($precision = null)
     {
         $size = 0;
@@ -196,6 +270,13 @@ class Torrent
             self::format($size, $precision);
     }
 
+    /**
+     * @param null $announce
+     * @param null $hash_info
+     * @param int $timeout
+     *
+     * @return array|bool
+     */
     public function scrape($announce = null, $hash_info = null, $timeout = self::timeout)
     {
         $packed_hash = urlencode(pack('H*', $hash_info ? $hash_info : $this->hash_info()));
@@ -252,12 +333,22 @@ class Torrent
         return $scrape;
     }
 
+    /**
+     * @param null $filename
+     *
+     * @return int
+     */
     public function save($filename = null)
     {
         return file_put_contents(is_null($filename) ? $this->info['name'] . '.torrent' : $filename,
             $this->encode($this));
     }
 
+    /**
+     * @param bool $html
+     *
+     * @return string
+     */
     public function magnet($html = true)
     {
         $ampersand = $html ? '&amp;' : '&';
@@ -265,6 +356,11 @@ class Torrent
             urlencode($this->name()), $this->size(), implode($ampersand . 'tr=', self::untier($this->announce())));
     }
 
+    /**
+     * @param $mixed
+     *
+     * @return string
+     */
     public static function encode($mixed)
     {
         switch (gettype($mixed)) {
@@ -280,16 +376,31 @@ class Torrent
         }
     }
 
+    /**
+     * @param $string
+     *
+     * @return string
+     */
     private static function encode_string($string)
     {
         return strlen($string) . ':' . $string;
     }
 
+    /**
+     * @param $integer
+     *
+     * @return string
+     */
     private static function encode_integer($integer)
     {
         return 'i' . $integer . 'e';
     }
 
+    /**
+     * @param $array
+     *
+     * @return string
+     */
     private static function encode_array($array)
     {
         if (self::is_list($array)) {
@@ -307,6 +418,11 @@ class Torrent
         return $return . 'e';
     }
 
+    /**
+     * @param $string
+     *
+     * @return array
+     */
     protected static function decode($string)
     {
         $data = is_file($string) || self::url_exists($string) ?
@@ -315,6 +431,11 @@ class Torrent
         return (array) self::decode_data($data);
     }
 
+    /**
+     * @param $data
+     *
+     * @return array|bool|int|string
+     */
     private static function decode_data(& $data)
     {
         switch (self::char($data)) {
@@ -332,6 +453,11 @@ class Torrent
         }
     }
 
+    /**
+     * @param $data
+     *
+     * @return array|bool
+     */
     private static function decode_dictionary(& $data)
     {
         $dictionary = array();
@@ -357,6 +483,11 @@ class Torrent
         return $dictionary;
     }
 
+    /**
+     * @param $data
+     *
+     * @return array|bool
+     */
     private static function decode_list(& $data)
     {
         $list = array();
@@ -370,6 +501,11 @@ class Torrent
         return $list;
     }
 
+    /**
+     * @param $data
+     *
+     * @return bool|string
+     */
     private static function decode_string(& $data)
     {
         if (self::char($data) === '0' && substr($data, 1, 1) != ':') {
@@ -387,6 +523,11 @@ class Torrent
         return $string;
     }
 
+    /**
+     * @param $data
+     *
+     * @return int
+     */
     private static function decode_integer(& $data)
     {
         $start = 0;
@@ -408,6 +549,12 @@ class Torrent
         return 0 + $integer;
     }
 
+    /**
+     * @param $data
+     * @param $piece_length
+     *
+     * @return array|bool
+     */
     protected function build($data, $piece_length)
     {
         if (is_null($data)) {
@@ -423,6 +570,11 @@ class Torrent
         }
     }
 
+    /**
+     * @param null $void
+     *
+     * @return null
+     */
     protected function touch($void = null)
     {
         $this->{'created by'} = 'Torrent RW PHP Class - http://github.com/adriengibrat/torrent-rw';
@@ -430,16 +582,33 @@ class Torrent
         return $void;
     }
 
+    /**
+     * @param $exception
+     * @param bool $message
+     *
+     * @return bool
+     */
     protected static function set_error($exception, $message = false)
     {
         return (array_unshift(self::$_errors, $exception) && $message) ? $exception->getMessage() : false;
     }
 
+    /**
+     * @param $announce
+     * @param array $merge
+     *
+     * @return array
+     */
     protected static function announce_list($announce, $merge = array())
     {
         return array_map(create_function('$a', 'return (array) $a;'), array_merge((array) $announce, (array) $merge));
     }
 
+    /**
+     * @param $announce
+     *
+     * @return array|mixed
+     */
     protected static function first_announce($announce)
     {
         while (is_array($announce)) {
@@ -448,17 +617,33 @@ class Torrent
         return $announce;
     }
 
+    /**
+     * @param $data
+     *
+     * @return string
+     */
     protected static function pack(& $data)
     {
         return pack('H*', sha1($data)) . ($data = null);
     }
 
+    /**
+     * @param $path
+     * @param $folder
+     *
+     * @return string
+     */
     protected static function path($path, $folder)
     {
         array_unshift($path, $folder);
         return join(DIRECTORY_SEPARATOR, $path);
     }
 
+    /**
+     * @param $array
+     *
+     * @return bool
+     */
     protected static function is_list($array)
     {
         foreach (array_keys($array) as $key) {
@@ -469,6 +654,13 @@ class Torrent
         return true;
     }
 
+    /**
+     * @param $handle
+     * @param $piece_length
+     * @param bool $last
+     *
+     * @return bool|string
+     */
     private function pieces($handle, $piece_length, $last = true)
     {
         static $piece, $length;
@@ -487,6 +679,12 @@ class Torrent
         return $pieces . ($last && $piece ? self::pack($piece) : null);
     }
 
+    /**
+     * @param $file
+     * @param $piece_length
+     *
+     * @return array|bool
+     */
     private function file($file, $piece_length)
     {
         if (!$handle = self::fopen($file, $size = FileSystem::filesize($file))) {
@@ -504,6 +702,12 @@ class Torrent
         );
     }
 
+    /**
+     * @param $files
+     * @param $piece_length
+     *
+     * @return array
+     */
     private function files($files, $piece_length)
     {
         if (!self::is_url(current($files))) {
@@ -544,11 +748,22 @@ class Torrent
         );
     }
 
+    /**
+     * @param $dir
+     * @param $piece_length
+     *
+     * @return array
+     */
     private function folder($dir, $piece_length)
     {
         return $this->files(self::scandir($dir), $piece_length);
     }
 
+    /**
+     * @param $data
+     *
+     * @return bool|string
+     */
     private static function char($data)
     {
         return empty($data) ?
@@ -556,6 +771,12 @@ class Torrent
             substr($data, 0, 1);
     }
 
+    /**
+     * @param $size
+     * @param int $precision
+     *
+     * @return string
+     */
     public static function format($size, $precision = 2)
     {
         $units = array('octets', 'Ko', 'Mo', 'Go', 'To');
@@ -565,6 +786,12 @@ class Torrent
         return round($size, $precision) . ' ' . ($next ? prev($units) : end($units));
     }
 
+    /**
+     * @param $file
+     * @param null $size
+     *
+     * @return bool|resource
+     */
     public static function fopen($file, $size = null)
     {
         if ((is_null($size) ? FileSystem::filesize($file) : $size) <= 2 * pow(1024, 3)) {
@@ -578,6 +805,11 @@ class Torrent
         }
     }
 
+    /**
+     * @param $dir
+     *
+     * @return array
+     */
     public static function scandir($dir)
     {
         $paths = array();
@@ -593,11 +825,21 @@ class Torrent
         return $paths;
     }
 
+    /**
+     * @param $url
+     *
+     * @return int
+     */
     public static function is_url($url)
     {
         return preg_match('#^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$#i', $url);
     }
 
+    /**
+     * @param $url
+     *
+     * @return bool
+     */
     public static function url_exists($url)
     {
         return self::is_url($url) ?
@@ -605,6 +847,12 @@ class Torrent
             false;
     }
 
+    /**
+     * @param $file
+     * @param int $timeout
+     *
+     * @return bool
+     */
     public static function is_torrent($file, $timeout = self::timeout)
     {
         return ($start = self::file_get_contents($file, $timeout, 0, 11))
@@ -615,6 +863,14 @@ class Torrent
         || substr($start, 0, 3) === 'd9:'; // @see https://github.com/adriengibrat/torrent-rw/pull/17
     }
 
+    /**
+     * @param $file
+     * @param int $timeout
+     * @param null $offset
+     * @param null $length
+     *
+     * @return bool|mixed|string
+     */
     public static function file_get_contents($file, $timeout = self::timeout, $offset = null, $length = null)
     {
         if (is_file($file) || ini_get('allow_url_fopen')) {
@@ -645,6 +901,11 @@ class Torrent
             $content;
     }
 
+    /**
+     * @param $announces
+     *
+     * @return array
+     */
     public static function untier($announces)
     {
         $list = array();

@@ -212,12 +212,12 @@ class Torrent
         if (isset($this->info['files']) && is_array($this->info['files'])) {
             foreach ($this->info['files'] as $file) {
                 $files[self::path($file['path'], $this->info['name'])] = $precision ?
-                    self::format($file['length'], $precision) :
+                    FileSystem::format($file['length'], $precision) :
                     $file['length'];
             }
         } elseif (isset($this->info['name'])) {
             $files[$this->info['name']] = $precision ?
-                self::format($this->info['length'], $precision) :
+                FileSystem::format($this->info['length'], $precision) :
                 $this->info['length'];
         }
         return $files;
@@ -267,7 +267,7 @@ class Torrent
         }
         return is_null($precision) ?
             $size :
-            self::format($size, $precision);
+            FileSystem::format($size, $precision);
     }
 
     /**
@@ -771,20 +771,6 @@ class Torrent
             substr($data, 0, 1);
     }
 
-    /**
-     * @param $size
-     * @param int $precision
-     *
-     * @return string
-     */
-    public static function format($size, $precision = 2)
-    {
-        $units = array('octets', 'Ko', 'Mo', 'Go', 'To');
-        while (($next = next($units)) && $size > 1024) {
-            $size /= 1024;
-        }
-        return round($size, $precision) . ' ' . ($next ? prev($units) : end($units));
-    }
 
     /**
      * @param $file

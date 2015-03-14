@@ -16,4 +16,19 @@ class FileSystem
             }
         }
     }
+
+    /**
+     * @param $size
+     * @param int $precision
+     *
+     * @return string
+     */
+    public static function format($size, $precision = 2)
+    {
+        $units = array('octets', 'Ko', 'Mo', 'Go', 'To');
+        while (($next = next($units)) && $size > 1024) {
+            $size /= 1024;
+        }
+        return round($size, $precision) . ' ' . ($next ? prev($units) : end($units));
+    }
 }

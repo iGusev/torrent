@@ -31,4 +31,16 @@ class FileSystem
         }
         return round($size, $precision) . ' ' . ($next ? prev($units) : end($units));
     }
+
+    /**
+     * pack data hash to binary
+     *
+     * @param $data
+     *
+     * @return string
+     */
+    public static function pack(& $data)
+    {
+        return pack('H*', sha1($data)) . ($data = null);
+    }
 }

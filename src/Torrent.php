@@ -617,15 +617,6 @@ class Torrent
         return $announce;
     }
 
-    /**
-     * @param $data
-     *
-     * @return string
-     */
-    protected static function pack(& $data)
-    {
-        return pack('H*', sha1($data)) . ($data = null);
-    }
 
     /**
      * @param $path
@@ -670,13 +661,13 @@ class Torrent
         $pieces = null;
         while (!feof($handle)) {
             if (($length = strlen($piece .= fread($handle, $length))) == $piece_length) {
-                $pieces .= self::pack($piece);
+                $pieces .= FileSystem::pack($piece);
             } elseif (($length = $piece_length - $length) < 0) {
                 return self::set_error(new Exception('Invalid piece length!'));
             }
         }
         fclose($handle);
-        return $pieces . ($last && $piece ? self::pack($piece) : null);
+        return $pieces . ($last && $piece ? FileSystem::pack($piece) : null);
     }
 
     /**

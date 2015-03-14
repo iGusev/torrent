@@ -21,7 +21,7 @@ class Torrent
      */
     protected $info;
 
-    static protected $_errors = array();
+    protected static $_errors = array();
 
     public function __construct($data = null, $meta = array(), $piece_length = 256)
     {
@@ -305,7 +305,7 @@ class Torrent
         return $return . 'e';
     }
 
-    static protected function decode($string)
+    protected static function decode($string)
     {
         $data = is_file($string) || self::url_exists($string) ?
             self::file_get_contents($string) :
@@ -428,17 +428,17 @@ class Torrent
         return $void;
     }
 
-    static protected function set_error($exception, $message = false)
+    protected static function set_error($exception, $message = false)
     {
         return (array_unshift(self::$_errors, $exception) && $message) ? $exception->getMessage() : false;
     }
 
-    static protected function announce_list($announce, $merge = array())
+    protected static function announce_list($announce, $merge = array())
     {
         return array_map(create_function('$a', 'return (array) $a;'), array_merge((array) $announce, (array) $merge));
     }
 
-    static protected function first_announce($announce)
+    protected static function first_announce($announce)
     {
         while (is_array($announce)) {
             $announce = reset($announce);
@@ -446,18 +446,18 @@ class Torrent
         return $announce;
     }
 
-    static protected function pack(& $data)
+    protected static function pack(& $data)
     {
         return pack('H*', sha1($data)) . ($data = null);
     }
 
-    static protected function path($path, $folder)
+    protected static function path($path, $folder)
     {
         array_unshift($path, $folder);
         return join(DIRECTORY_SEPARATOR, $path);
     }
 
-    static protected function is_list($array)
+    protected static function is_list($array)
     {
         foreach (array_keys($array) as $key) {
             if (!is_int($key)) {

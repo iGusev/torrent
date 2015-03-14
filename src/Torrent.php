@@ -249,7 +249,7 @@ class Torrent
             urlencode($this->name()), $this->size(), implode($ampersand . 'tr=', self::untier($this->announce())));
     }
 
-    static public function encode($mixed)
+    public static function encode($mixed)
     {
         switch (gettype($mixed)) {
             case 'integer':
@@ -264,17 +264,17 @@ class Torrent
         }
     }
 
-    static private function encode_string($string)
+    private static function encode_string($string)
     {
         return strlen($string) . ':' . $string;
     }
 
-    static private function encode_integer($integer)
+    private static function encode_integer($integer)
     {
         return 'i' . $integer . 'e';
     }
 
-    static private function encode_array($array)
+    private static function encode_array($array)
     {
         if (self::is_list($array)) {
             $return = 'l';
@@ -299,7 +299,7 @@ class Torrent
         return (array) self::decode_data($data);
     }
 
-    static private function decode_data(& $data)
+    private static function decode_data(& $data)
     {
         switch (self::char($data)) {
             case 'i':
@@ -316,7 +316,7 @@ class Torrent
         }
     }
 
-    static private function decode_dictionary(& $data)
+    private static function decode_dictionary(& $data)
     {
         $dictionary = array();
         $previous = null;
@@ -341,7 +341,7 @@ class Torrent
         return $dictionary;
     }
 
-    static private function decode_list(& $data)
+    private static function decode_list(& $data)
     {
         $list = array();
         while (($char = self::char($data)) != 'e') {
@@ -354,7 +354,7 @@ class Torrent
         return $list;
     }
 
-    static private function decode_string(& $data)
+    private static function decode_string(& $data)
     {
         if (self::char($data) === '0' && substr($data, 1, 1) != ':') {
             self::set_error(new Exception('Invalid string length, leading zero'));
@@ -371,7 +371,7 @@ class Torrent
         return $string;
     }
 
-    static private function decode_integer(& $data)
+    private static function decode_integer(& $data)
     {
         $start = 0;
         $end = strpos($data, 'e');
@@ -533,14 +533,14 @@ class Torrent
         return $this->files(self::scandir($dir), $piece_length);
     }
 
-    static private function char($data)
+    private static function char($data)
     {
         return empty($data) ?
             false :
             substr($data, 0, 1);
     }
 
-    static public function format($size, $precision = 2)
+    public static function format($size, $precision = 2)
     {
         $units = array('octets', 'Ko', 'Mo', 'Go', 'To');
         while (($next = next($units)) && $size > 1024) {
@@ -549,7 +549,7 @@ class Torrent
         return round($size, $precision) . ' ' . ($next ? prev($units) : end($units));
     }
 
-    static public function filesize($file)
+    public static function filesize($file)
     {
         if (is_file($file)) {
             return (double) sprintf('%u', @filesize($file));
@@ -560,7 +560,7 @@ class Torrent
         }
     }
 
-    static public function fopen($file, $size = null)
+    public static function fopen($file, $size = null)
     {
         if ((is_null($size) ? self::filesize($file) : $size) <= 2 * pow(1024, 3)) {
             return fopen($file, 'r');
@@ -573,7 +573,7 @@ class Torrent
         }
     }
 
-    static public function scandir($dir)
+    public static function scandir($dir)
     {
         $paths = array();
         foreach (scandir($dir) as $item) {
@@ -588,19 +588,19 @@ class Torrent
         return $paths;
     }
 
-    static public function is_url($url)
+    public static function is_url($url)
     {
         return preg_match('#^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$#i', $url);
     }
 
-    static public function url_exists($url)
+    public static function url_exists($url)
     {
         return self::is_url($url) ?
             (bool) self::filesize($url) :
             false;
     }
 
-    static public function is_torrent($file, $timeout = self::timeout)
+    public static function is_torrent($file, $timeout = self::timeout)
     {
         return ($start = self::file_get_contents($file, $timeout, 0, 11))
         && $start === 'd8:announce'
@@ -610,7 +610,7 @@ class Torrent
         || substr($start, 0, 3) === 'd9:'; // @see https://github.com/adriengibrat/torrent-rw/pull/17
     }
 
-    static public function file_get_contents($file, $timeout = self::timeout, $offset = null, $length = null)
+    public static function file_get_contents($file, $timeout = self::timeout, $offset = null, $length = null)
     {
         if (is_file($file) || ini_get('allow_url_fopen')) {
             $context = !is_file($file) && $timeout ?
@@ -640,7 +640,7 @@ class Torrent
             $content;
     }
 
-    static public function untier($announces)
+    public static function untier($announces)
     {
         $list = array();
         foreach ((array) $announces as $tier) {

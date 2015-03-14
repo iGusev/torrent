@@ -14,6 +14,13 @@ class Torrent
      */
     protected $comment;
 
+    /**
+     * Info about the file(s) in the torrent
+     *
+     * @var array
+     */
+    protected $info;
+
     static protected $_errors = array();
 
     public function __construct($data = null, $meta = array(), $piece_length = 256)

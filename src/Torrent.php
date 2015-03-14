@@ -555,7 +555,7 @@ class Torrent
         }
         return $announce;
     }
-    
+
     /**
      * @param $handle
      * @param $piece_length
@@ -662,19 +662,6 @@ class Torrent
     }
 
     /**
-     * @param $data
-     *
-     * @return bool|string
-     */
-    private static function char($data)
-    {
-        return empty($data) ?
-            false :
-            substr($data, 0, 1);
-    }
-
-
-    /**
      * @param $file
      * @param null $size
      *
@@ -692,27 +679,6 @@ class Torrent
             return popen('cat ' . escapeshellarg(realpath($file)), 'r');
         }
     }
-
-    /**
-     * @param $dir
-     *
-     * @return array
-     */
-    public static function scandir($dir)
-    {
-        $paths = array();
-        foreach (scandir($dir) as $item) {
-            if ($item != '.' && $item != '..') {
-                if (is_dir($path = realpath($dir . DIRECTORY_SEPARATOR . $item))) {
-                    $paths = array_merge(self::scandir($path), $paths);
-                } else {
-                    $paths[] = $path;
-                }
-            }
-        }
-        return $paths;
-    }
-
 
     /**
      * @param $file

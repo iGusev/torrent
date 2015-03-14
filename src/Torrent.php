@@ -2,6 +2,8 @@
 
 namespace League\Torrent;
 
+use League\Torrent\Helper\FileSystem;
+
 class Torrent
 {
 
@@ -487,7 +489,7 @@ class Torrent
 
     private function file($file, $piece_length)
     {
-        if (!$handle = self::fopen($file, $size = self::filesize($file))) {
+        if (!$handle = self::fopen($file, $size = FileSystem::filesize($file))) {
             return self::set_error(new Exception('Failed to open file: "' . $file . '"'));
         }
         if (self::is_url($file)) {
@@ -524,7 +526,7 @@ class Torrent
                 self::set_error(new Exception('Files must be in the same folder: "' . $file . '" discarded'));
                 continue;
             }
-            if (!$handle = self::fopen($file, $filesize = self::filesize($file))) {
+            if (!$handle = self::fopen($file, $filesize = FileSystem::filesize($file))) {
                 self::set_error(new Exception('Failed to open file: "' . $file . '" discarded'));
                 continue;
             }
@@ -563,20 +565,9 @@ class Torrent
         return round($size, $precision) . ' ' . ($next ? prev($units) : end($units));
     }
 
-    public static function filesize($file)
-    {
-        if (is_file($file)) {
-            return (double) sprintf('%u', @filesize($file));
-        } else {
-            if ($content_length = preg_grep($pattern = '#^Content-Length:\s+(\d+)$#i', (array) @get_headers($file))) {
-                return (int) preg_replace($pattern, '$1', reset($content_length));
-            }
-        }
-    }
-
     public static function fopen($file, $size = null)
     {
-        if ((is_null($size) ? self::filesize($file) : $size) <= 2 * pow(1024, 3)) {
+        if ((is_null($size) ? FileSystem::filesize($file) : $size) <= 2 * pow(1024, 3)) {
             return fopen($file, 'r');
         } elseif (PHP_OS != 'Linux') {
             return self::set_error(new Exception('File size is greater than 2GB. This is only supported under Linux'));
@@ -610,7 +601,7 @@ class Torrent
     public static function url_exists($url)
     {
         return self::is_url($url) ?
-            (bool) self::filesize($url) :
+            (bool) FileSystem::filesize($url) :
             false;
     }
 

@@ -242,15 +242,6 @@ class Torrent
             $this->encode($this));
     }
 
-    public function send($filename = null)
-    {
-        $data = $this->encode($this);
-        header('Content-type: application/x-bittorrent');
-        header('Content-Length: ' . strlen($data));
-        header('Content-Disposition: attachment; filename="' . (is_null($filename) ? $this->info['name'] . '.torrent' : $filename) . '"');
-        exit($data);
-    }
-
     public function magnet($html = true)
     {
         $ampersand = $html ? '&amp;' : '&';

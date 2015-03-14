@@ -50,7 +50,7 @@ class Torrent
             return false;
         }
         if ($piece_length < 32 || $piece_length > 4096) {
-            return self::set_error(new Exception('Invalid piece lenth, must be between 32 and 4096'));
+            throw new \Exception('Invalid piece lenth, must be between 32 and 4096');
         }
         if (is_string($meta)) {
             $meta = array('announce' => $meta);
@@ -285,7 +285,7 @@ class Torrent
         $packed_hash = urlencode(pack('H*', $hash_info ? $hash_info : $this->hash_info()));
         $handles = $scrape = array();
         if (!function_exists('curl_multi_init')) {
-            return self::set_error(new Exception('Install CURL with "curl_multi_init" enabled'));
+            throw new \Exception('Install CURL with "curl_multi_init" enabled');
         }
         $curl = curl_multi_init();
         foreach ((array) ($announce ? $announce : $this->announce()) as $tier) {
@@ -355,8 +355,14 @@ class Torrent
     public function magnet($html = true)
     {
         $ampersand = $html ? '&amp;' : '&';
-        return sprintf('magnet:?xt=urn:btih:%2$s%1$sdn=%3$s%1$sxl=%4$d%1$str=%5$s', $ampersand, $this->hash_info(),
-            urlencode($this->name()), $this->size(), implode($ampersand . 'tr=', FileSystem::untier($this->announce())));
+        return sprintf(
+            'magnet:?xt=urn:btih:%2$s%1$sdn=%3$s%1$sxl=%4$d%1$str=%5$s',
+            $ampersand,
+            $this->hash_info(),
+            urlencode($this->name()),
+            $this->size(),
+            implode($ampersand . 'tr=', FileSystem::untier($this->announce()))
+        );
     }
 
     /**
@@ -458,7 +464,7 @@ class Torrent
             if (($length = strlen($piece .= fread($handle, $length))) == $piece_length) {
                 $pieces .= FileSystem::pack($piece);
             } elseif (($length = $piece_length - $length) < 0) {
-                return self::set_error(new Exception('Invalid piece length!'));
+                throw new \Exception('Invalid piece length!');
             }
         }
         fclose($handle);
@@ -474,7 +480,7 @@ class Torrent
     private function file($file, $piece_length)
     {
         if (!$handle = self::fopen($file, $size = FileSystem::filesize($file))) {
-            return self::set_error(new Exception('Failed to open file: "' . $file . '"'));
+            throw new \Exception('Failed to open file: "' . $file . '"');
         }
         if (FileSystem::is_url($file)) {
             $this->url_list($file);
@@ -513,12 +519,10 @@ class Torrent
         $count = count($files) - 1;
         foreach ($files as $i => $file) {
             if ($path != array_intersect_assoc($file_path = explode(DIRECTORY_SEPARATOR, $file), $path)) {
-                self::set_error(new Exception('Files must be in the same folder: "' . $file . '" discarded'));
-                continue;
+                throw new \Exception('Files must be in the same folder: "' . $file . '" discarded');
             }
             if (!$handle = self::fopen($file, $filesize = FileSystem::filesize($file))) {
-                self::set_error(new Exception('Failed to open file: "' . $file . '" discarded'));
-                continue;
+                throw new \Exception('Failed to open file: "' . $file . '" discarded');
             }
             $pieces .= $this->pieces($handle, $piece_length, $count == $i);
             $info_files[] = array(
@@ -556,7 +560,7 @@ class Torrent
         if ((is_null($size) ? FileSystem::filesize($file) : $size) <= 2 * pow(1024, 3)) {
             return fopen($file, 'r');
         } elseif (PHP_OS != 'Linux') {
-            return self::set_error(new Exception('File size is greater than 2GB. This is only supported under Linux'));
+            throw new \Exception('File size is greater than 2GB. This is only supported under Linux');
         } elseif (!is_readable($file)) {
             return false;
         } else {
@@ -599,7 +603,7 @@ class Torrent
                 @file_get_contents($file, false, $context, $offset) :
                 @file_get_contents($file, false, $context);
         } elseif (!function_exists('curl_init')) {
-            return self::set_error(new Exception('Install CURL or enable "allow_url_fopen"'));
+            throw new \Exception('Install CURL or enable "allow_url_fopen"');
         }
         $handle = curl_init($file);
         if ($timeout) {

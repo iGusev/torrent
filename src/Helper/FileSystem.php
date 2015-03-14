@@ -2,6 +2,8 @@
 
 namespace League\Torrent\Helper;
 
+use League\Torrent\Torrent;
+
 class FileSystem
 {
 
@@ -42,5 +44,43 @@ class FileSystem
     public static function pack(& $data)
     {
         return pack('H*', sha1($data)) . ($data = null);
+    }
+
+    /**
+     * @param $url
+     *
+     * @return int
+     */
+    public static function is_url($url)
+    {
+        return preg_match('#^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$#i', $url);
+    }
+
+    /**
+     * @param $url
+     *
+     * @return bool
+     */
+    public static function url_exists($url)
+    {
+        return FileSystem::is_url($url) ?
+            (bool) FileSystem::filesize($url) :
+            false;
+    }
+
+    /**
+     * @param $announces
+     *
+     * @return array
+     */
+    public static function untier($announces)
+    {
+        $list = array();
+        foreach ((array) $announces as $tier) {
+            is_array($tier) ?
+                $list = array_merge($list, FileSystem::untier($tier)) :
+                array_push($list, $tier);
+        }
+        return $list;
     }
 }

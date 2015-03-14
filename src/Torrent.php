@@ -353,7 +353,7 @@ class Torrent
     {
         $ampersand = $html ? '&amp;' : '&';
         return sprintf('magnet:?xt=urn:btih:%2$s%1$sdn=%3$s%1$sxl=%4$d%1$str=%5$s', $ampersand, $this->hash_info(),
-            urlencode($this->name()), $this->size(), implode($ampersand . 'tr=', self::untier($this->announce())));
+            urlencode($this->name()), $this->size(), implode($ampersand . 'tr=', FileSystem::untier($this->announce())));
     }
 
     /**
@@ -425,7 +425,7 @@ class Torrent
      */
     protected static function decode($string)
     {
-        $data = is_file($string) || self::url_exists($string) ?
+        $data = is_file($string) || FileSystem::url_exists($string) ?
             self::file_get_contents($string) :
             $string;
         return (array) self::decode_data($data);
@@ -563,7 +563,7 @@ class Torrent
             return $this->info = $this->files($data, $piece_length);
         } elseif (is_dir($data)) {
             return $this->info = $this->folder($data, $piece_length);
-        } elseif ((is_file($data) || self::url_exists($data)) && !self::is_torrent($data)) {
+        } elseif ((is_file($data) || FileSystem::url_exists($data)) && !self::is_torrent($data)) {
             return $this->info = $this->file($data, $piece_length);
         } else {
             return false;
@@ -681,7 +681,7 @@ class Torrent
         if (!$handle = self::fopen($file, $size = FileSystem::filesize($file))) {
             return self::set_error(new Exception('Failed to open file: "' . $file . '"'));
         }
-        if (self::is_url($file)) {
+        if (FileSystem::is_url($file)) {
             $this->url_list($file);
         }
         $path = explode(DIRECTORY_SEPARATOR, $file);
@@ -701,7 +701,7 @@ class Torrent
      */
     private function files($files, $piece_length)
     {
-        if (!self::is_url(current($files))) {
+        if (!FileSystem::is_url(current($files))) {
             $files = array_map('realpath', $files);
         }
         sort($files);
@@ -709,7 +709,7 @@ class Torrent
             create_function('$a,$b', 'return strrpos($a,DIRECTORY_SEPARATOR)-strrpos($b,DIRECTORY_SEPARATOR);'));
         $first = current($files);
         $root = dirname($first);
-        if ($url = self::is_url($first)) {
+        if ($url = FileSystem::is_url($first)) {
             $this->url_list(dirname($root) . DIRECTORY_SEPARATOR);
         }
         $path = explode(DIRECTORY_SEPARATOR, dirname($url ? $first : realpath($first)));
@@ -802,27 +802,6 @@ class Torrent
         return $paths;
     }
 
-    /**
-     * @param $url
-     *
-     * @return int
-     */
-    public static function is_url($url)
-    {
-        return preg_match('#^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$#i', $url);
-    }
-
-    /**
-     * @param $url
-     *
-     * @return bool
-     */
-    public static function url_exists($url)
-    {
-        return self::is_url($url) ?
-            (bool) FileSystem::filesize($url) :
-            false;
-    }
 
     /**
      * @param $file
@@ -876,21 +855,5 @@ class Torrent
             substr($content, $offset, $length) :
             substr($content, $offset) :
             $content;
-    }
-
-    /**
-     * @param $announces
-     *
-     * @return array
-     */
-    public static function untier($announces)
-    {
-        $list = array();
-        foreach ((array) $announces as $tier) {
-            is_array($tier) ?
-                $list = array_merge($list, self::untier($tier)) :
-                array_push($list, $tier);
-        }
-        return $list;
     }
 }

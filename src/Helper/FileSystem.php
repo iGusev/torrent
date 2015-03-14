@@ -110,4 +110,36 @@ class FileSystem
         array_unshift($path, $folder);
         return join(DIRECTORY_SEPARATOR, $path);
     }
+
+    /**
+     * @param $dir
+     *
+     * @return array
+     */
+    public static function scandir($dir)
+    {
+        $paths = array();
+        foreach (scandir($dir) as $item) {
+            if ($item != '.' && $item != '..') {
+                if (is_dir($path = realpath($dir . DIRECTORY_SEPARATOR . $item))) {
+                    $paths = array_merge(self::scandir($path), $paths);
+                } else {
+                    $paths[] = $path;
+                }
+            }
+        }
+        return $paths;
+    }
+
+    /**
+     * @param $data
+     *
+     * @return bool|string
+     */
+    public static function char($data)
+    {
+        return empty($data) ?
+            false :
+            substr($data, 0, 1);
+    }
 }

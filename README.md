@@ -1,4 +1,4 @@
-# :package_name
+# League\Torrent
 
 [![Latest Version](https://img.shields.io/github/release/thephpleague/:package_name.svg?style=flat-square)](https://github.com/thephpleague/:package_name/releases)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
@@ -17,7 +17,7 @@ PSRs you support to avoid any confusion with users and contributors.
 Via Composer
 
 ``` bash
-$ composer require league/:package_name
+$ composer require league/torrent
 ```
 
 ## Usage
@@ -39,11 +39,11 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security
 
-If you discover any security related issues, please email :author_email instead of using the issue tracker.
+If you discover any security related issues, please email mail@igusev.ru instead of using the issue tracker.
 
 ## Credits
 
-- [:author_name](https://github.com/:author_username)
+- [Ilya Gusev](https://github.com/iGusev)
 - [All Contributors](../../contributors)
 
 ## License

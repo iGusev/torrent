@@ -1,17 +1,17 @@
 {
-    "name": "league/:package_name",
-    "description": ":package_description",
+    "name": "league/torrent",
+    "description": "League/torrent is a lightweight PHP library for work with torrents",
     "keywords": [
         "league",
-        ":package_name"
+        "league/torrent"
     ],
-    "homepage": "https://github.com/thephpleague/:package_name",
+    "homepage": "https://github.com/thephpleague/torrent",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": ":author_email",
-            "homepage": ":author_website",
+            "name": "Ilya Gusev",
+            "email": "mail@igusev.ru",
+            "homepage": "https://php-cat.com",
             "role": "Developer"
         }
     ],

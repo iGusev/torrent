@@ -83,4 +83,31 @@ class FileSystem
         }
         return $list;
     }
+
+    /**
+     * @param $array
+     *
+     * @return bool
+     */
+    public static function is_list($array)
+    {
+        foreach (array_keys($array) as $key) {
+            if (!is_int($key)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param $path
+     * @param $folder
+     *
+     * @return string
+     */
+    public static function path($path, $folder)
+    {
+        array_unshift($path, $folder);
+        return join(DIRECTORY_SEPARATOR, $path);
+    }
 }

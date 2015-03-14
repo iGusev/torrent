@@ -14,6 +14,7 @@ class Torrent
 
     /**
      *
+     * @var int
      */
     const timeout = 30;
 
@@ -211,7 +212,7 @@ class Torrent
         $files = array();
         if (isset($this->info['files']) && is_array($this->info['files'])) {
             foreach ($this->info['files'] as $file) {
-                $files[self::path($file['path'], $this->info['name'])] = $precision ?
+                $files[FileSystem::path($file['path'], $this->info['name'])] = $precision ?
                     FileSystem::format($file['length'], $precision) :
                     $file['length'];
             }
@@ -232,7 +233,7 @@ class Torrent
         $size = 0;
         if (isset($this->info['files']) && is_array($this->info['files'])) {
             foreach ($this->info['files'] as $file) {
-                $files[self::path($file['path'], $this->info['name'])] = array(
+                $files[FileSystem::path($file['path'], $this->info['name'])] = array(
                     'startpiece' => floor($size / $this->info['piece length']),
                     'offset' => fmod($size, $this->info['piece length']),
                     'size' => $size += $file['length'],
@@ -403,7 +404,7 @@ class Torrent
      */
     private static function encode_array($array)
     {
-        if (self::is_list($array)) {
+        if (FileSystem::is_list($array)) {
             $return = 'l';
             foreach ($array as $value) {
                 $return .= self::encode($value);
@@ -559,7 +560,7 @@ class Torrent
     {
         if (is_null($data)) {
             return false;
-        } elseif (is_array($data) && self::is_list($data)) {
+        } elseif (is_array($data) && FileSystem::is_list($data)) {
             return $this->info = $this->files($data, $piece_length);
         } elseif (is_dir($data)) {
             return $this->info = $this->folder($data, $piece_length);
@@ -616,35 +617,7 @@ class Torrent
         }
         return $announce;
     }
-
-
-    /**
-     * @param $path
-     * @param $folder
-     *
-     * @return string
-     */
-    protected static function path($path, $folder)
-    {
-        array_unshift($path, $folder);
-        return join(DIRECTORY_SEPARATOR, $path);
-    }
-
-    /**
-     * @param $array
-     *
-     * @return bool
-     */
-    protected static function is_list($array)
-    {
-        foreach (array_keys($array) as $key) {
-            if (!is_int($key)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
+    
     /**
      * @param $handle
      * @param $piece_length

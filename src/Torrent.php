@@ -377,7 +377,7 @@ class Torrent
      */
     private static function decode_data(& $data)
     {
-        switch (self::char($data)) {
+        switch (FileSystem::char($data)) {
             case 'i':
                 $data = substr($data, 1);
                 return self::decode_integer($data);
@@ -401,7 +401,7 @@ class Torrent
     {
         $dictionary = array();
         $previous = null;
-        while (($char = self::char($data)) != 'e') {
+        while (($char = FileSystem::char($data)) != 'e') {
             if ($char === false) {
                 return self::set_error(new Exception('Unterminated dictionary'));
             }
@@ -430,7 +430,7 @@ class Torrent
     private static function decode_list(& $data)
     {
         $list = array();
-        while (($char = self::char($data)) != 'e') {
+        while (($char = FileSystem::char($data)) != 'e') {
             if ($char === false) {
                 return self::set_error(new Exception('Unterminated list'));
             }
@@ -447,7 +447,7 @@ class Torrent
      */
     private static function decode_string(& $data)
     {
-        if (self::char($data) === '0' && substr($data, 1, 1) != ':') {
+        if (FileSystem::char($data) === '0' && substr($data, 1, 1) != ':') {
             self::set_error(new Exception('Invalid string length, leading zero'));
         }
         if (!$colon = @strpos($data, ':')) {
@@ -474,7 +474,7 @@ class Torrent
         if ($end === 0) {
             self::set_error(new Exception('Empty integer'));
         }
-        if (self::char($data) == '-') {
+        if (FileSystem::char($data) == '-') {
             $start++;
         }
         if (substr($data, $start, 1) == '0' && $end > $start + 1) {
@@ -658,7 +658,7 @@ class Torrent
      */
     private function folder($dir, $piece_length)
     {
-        return $this->files(self::scandir($dir), $piece_length);
+        return $this->files(FileSystem::scandir($dir), $piece_length);
     }
 
     /**

@@ -61,11 +61,6 @@ class Torrent
     public $info;
 
     /**
-     * @var array
-     */
-    protected static $_errors = array();
-
-    /**
      * @param null $data
      * @param array $meta
      * @param int $piece_length
@@ -131,26 +126,6 @@ class Torrent
     public function __toString()
     {
         return Encoder::encode($this);
-    }
-
-    /**
-     * @return bool
-     */
-    public function error()
-    {
-        return empty(self::$_errors) ?
-            false :
-            self::$_errors[0]->getMessage();
-    }
-
-    /**
-     * @return array|bool
-     */
-    public function errors()
-    {
-        return empty(self::$_errors) ?
-            false :
-            self::$_errors;
     }
 
     /**
@@ -387,19 +362,17 @@ class Torrent
                 $tracker = explode('?', $info['url'], 2);
                 $tracker = array_shift($tracker);
                 if (empty($info['http_code'])) {
-                    $scrape[$tracker] = self::set_error(new Exception('Tracker request timeout (' . $timeout . 's)'),
-                        true);
+                    $scrape[$tracker] = 'Tracker request timeout (' . $timeout . 's)';
                     continue;
                 } elseif ($info['http_code'] != 200) {
-                    $scrape[$tracker] = self::set_error(new Exception('Tracker request failed (' . $info['http_code'] . ' code)'),
-                        true);
+                    $scrape[$tracker] = 'Tracker request failed (' . $info['http_code'] . ' code)';
                     continue;
                 }
                 $data = curl_multi_getcontent($done['handle']);
                 $stats = Decoder::decode_data($data);
                 curl_multi_remove_handle($curl, $done['handle']);
                 $scrape[$tracker] = empty($stats['files']) ?
-                    self::set_error(new Exception('Empty scrape data'), true) :
+                    'Empty scrape data' :
                     array_shift($stats['files']) + (empty($stats['flags']) ? array() : $stats['flags']);
             }
         } while ($running);
@@ -497,17 +470,6 @@ class Torrent
         $this->{'created by'} = 'Torrent RW PHP Class - http://github.com/adriengibrat/torrent-rw';
         $this->{'creation date'} = time();
         return $void;
-    }
-
-    /**
-     * @param $exception
-     * @param bool $message
-     *
-     * @return bool
-     */
-    protected static function set_error($exception, $message = false)
-    {
-        return (array_unshift(self::$_errors, $exception) && $message) ? $exception->getMessage() : false;
     }
 
     /**

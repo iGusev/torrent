@@ -67,7 +67,7 @@ class Torrent
 
     public static function createFromTorrentFile($filename, $meta = array())
     {
-        return self::setMeta(file_get_contents($filename), $meta);
+        return self::setMeta(new self(), file_get_contents($filename), $meta);
     }
 
     public static function createFromUrl($url, $meta = array())
@@ -76,13 +76,23 @@ class Torrent
             throw new \InvalidArgumentException('Url is not valud');
         }
 
-        return self::setMeta(self::downloadTorrent($url), $meta);
+        return self::setMeta(new self(), self::downloadTorrent($url), $meta);
     }
 
-    public static function setMeta($data, $addMeta = array())
+    public static function createFromFilesList(array $list, $meta = array())
     {
-        $instance = new self();
-        $meta = array_merge($addMeta, (array) Decoder::decode_data($data));
+        $instance = new self;
+        if ($instance->build($list, 256 * 1024)) {
+            $instance->touch();
+        }
+
+        return self::setMeta($instance, '', $meta);
+    }
+
+    public static function setMeta($instance, $data = '', $meta = array())
+    {
+        if(strlen($data))
+            $meta = array_merge($meta, (array) Decoder::decode_data($data));
 
         foreach ($meta as $key => $value) {
             $instance->{$key} = $value;

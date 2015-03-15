@@ -79,6 +79,29 @@ class Torrent
         return $instance;
     }
 
+    public static function createFromUrl($url, $meta = array())
+    {
+        if (!ini_get('allow_url_fopen')) {
+            if (!function_exists('curl_init')) {
+                throw new \Exception('Install CURL or enable "allow_url_fopen"');
+            } else {
+                $data = self::downloadViaCurl($url);
+            }
+        } else {
+            $data = self::downloadViaCurl($url);
+        }
+
+        $instance = new self();
+
+        $meta = array_merge($meta, (array) Decoder::decode_data($data));
+
+        foreach ($meta as $key => $value) {
+            $instance->{$key} = $value;
+        }
+
+        return $instance;
+    }
+
     /**
      * @return string
      */
@@ -634,5 +657,22 @@ class Torrent
             substr($content, $offset, $length) :
             substr($content, $offset) :
             $content;
+    }
+
+    public static function downloadViaStream($url, $timeout = self::timeout)
+    {
+        return file_get_contents($url, false, stream_context_create(array('http' => array('timeout' => $timeout))));
+    }
+
+    public static function downloadViaCurl($url, $timeout = self::timeout)
+    {
+        $handle = curl_init($url);
+        if ($timeout) {
+            curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);
+        }
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, 1);
+        $content = curl_exec($handle);
+        curl_close($handle);
+        return $content;
     }
 }

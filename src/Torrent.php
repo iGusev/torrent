@@ -65,7 +65,7 @@ class Torrent
         }
     }
 
-    public static function createFromFile($filename, $meta = array())
+    public static function createFromTorrentFile($filename, $meta = array())
     {
         return self::setMeta(file_get_contents($filename), $meta);
     }
@@ -165,7 +165,7 @@ class Torrent
     /**
      * @param null $name
      *
-     * @return null
+     * @return string
      */
     public function name($name = null)
     {
@@ -412,7 +412,7 @@ class Torrent
 
     /**
      * @param $data
-     * @param $piece_length
+     * @param integer $piece_length
      *
      * @return array|bool
      */
@@ -562,7 +562,7 @@ class Torrent
             $pieces .= $this->pieces($handle, $piece_length, $count == $i);
             $info_files[] = array(
                 'length' => $filesize,
-                'path' => array_diff($file_path, $path)
+                'path' => array_values(array_diff($file_path, $path))
             );
         }
         return array(

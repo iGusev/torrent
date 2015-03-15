@@ -28,7 +28,7 @@ class Encoder
     }
 
     /**
-     * @param $string
+     * @param string $string
      *
      * @return string
      */

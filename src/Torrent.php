@@ -173,15 +173,22 @@ class Torrent
     }
 
     /**
-     * @param null $name
      *
-     * @return string
+     * @return string|null
      */
-    public function name($name = null)
+    public function getName()
     {
-        return is_null($name) ?
-            isset($this->info['name']) ? $this->info['name'] : null :
-            $this->touch($this->info['name'] = (string) $name);
+        return isset($this->info['name']) ? $this->info['name'] : null;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return null|string
+     */
+    public function setName($name)
+    {
+        $this->touch($this->info['name'] = (string) $name);
     }
 
     /**
@@ -403,7 +410,7 @@ class Torrent
             'magnet:?xt=urn:btih:%2$s%1$sdn=%3$s%1$sxl=%4$d%1$str=%5$s',
             $ampersand,
             $this->hash_info(),
-            urlencode($this->name()),
+            urlencode($this->getName()),
             $this->size(),
             implode($ampersand . 'tr=', FileSystem::untier($this->announce()))
         );

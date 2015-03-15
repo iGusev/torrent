@@ -598,8 +598,7 @@ class Torrent
     }
 
     /**
-     * @param $file
-     * @param int $timeout
+     * @param $file 
      *
      * @return bool
      */

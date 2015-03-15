@@ -598,10 +598,7 @@ class Torrent
             $context = !is_file($file) && $timeout ?
                 stream_context_create(array('http' => array('timeout' => $timeout))) :
                 null;
-            return !is_null($offset) ? $length ?
-                @file_get_contents($file, false, $context, $offset, $length) :
-                @file_get_contents($file, false, $context, $offset) :
-                @file_get_contents($file, false, $context);
+            return file_get_contents($file, false, $context, $offset, $length);
         } elseif (!function_exists('curl_init')) {
             throw new \Exception('Install CURL or enable "allow_url_fopen"');
         }

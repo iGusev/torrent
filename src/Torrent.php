@@ -21,18 +21,44 @@ class Torrent
     const timeout = 30;
 
     /**
+     * List of strings that can start a torrent file
+     *
+     * @static
+     * @var array
+     */
+    protected static $torrentsChecks = array('d8:announce', 'd10:created', 'd13:creatio', 'd4:info', 'd9:');
+
+    /**
      * Optional comment
      *
      * @var string
      */
-    protected $comment;
+    public $comment;
+
+    /**
+     *
+     * @var string
+     */
+    public $announce;
+
+    /**
+     *
+     * @var string
+     */
+    protected $createdBy;
+
+    /**
+     *
+     * @var int
+     */
+    protected $creationDate;
 
     /**
      * Info about the file(s) in the torrent
      *
      * @var array
      */
-    protected $info;
+    public $info;
 
     /**
      * @var array
@@ -447,8 +473,8 @@ class Torrent
         } elseif (is_dir($data)) {
             return $this->info = $this->folder($data, $piece_length);
         } elseif (
-            (is_file($data) && !self::is_torrent(file_get_contents($data)))
-            || (FileSystem::url_exists($data) && !self::is_torrent(self::downloadTorrent($data)))
+            (is_file($data) && !self::isTorrent(file_get_contents($data)))
+            || (FileSystem::url_exists($data) && !self::isTorrent(self::downloadTorrent($data)))
         ) {
             return $this->info = $this->file($data, $piece_length);
         }
@@ -630,15 +656,18 @@ class Torrent
      *
      * @return bool
      */
-    public static function is_torrent($file)
+    public static function isTorrent($file)
     {
         $start = substr($file, 0, 11);
+        $check = false;
+        foreach (self::$torrentsChecks as $value) {
+            if (0 === strpos($start, $value)) {
+                $check = true;
+                continue;
+            }
+        }
 
-        return $start === 'd8:announce'
-        || $start === 'd10:created'
-        || $start === 'd13:creatio'
-        || substr($start, 0, 7) === 'd4:info'
-        || substr($start, 0, 3) === 'd9:';
+        return $check;
     }
 
     public static function downloadTorrent($url, $timeout = self::timeout)

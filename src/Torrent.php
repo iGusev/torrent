@@ -68,7 +68,9 @@ class Torrent
     public static function createFromFile($filename, $meta = array())
     {
         $instance = new self();
-        $meta = array_merge($meta, (array) Decoder::decode_data(file_get_contents($filename)));
+        $data = file_get_contents($filename);
+
+        $meta = array_merge($meta, (array) Decoder::decode_data($data));
 
         foreach ($meta as $key => $value) {
             $instance->{$key} = $value;
@@ -610,7 +612,10 @@ class Torrent
             $context = !is_file($file) && $timeout ?
                 stream_context_create(array('http' => array('timeout' => $timeout))) :
                 null;
-            return file_get_contents($file, false, $context, $offset, $length);
+            return !is_null($offset) ? $length ?
+                @file_get_contents($file, false, $context, $offset, $length) :
+                @file_get_contents($file, false, $context, $offset) :
+                @file_get_contents($file, false, $context);
         } elseif (!function_exists('curl_init')) {
             throw new \Exception('Install CURL or enable "allow_url_fopen"');
         }

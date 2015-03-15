@@ -373,14 +373,22 @@ class Torrent
     }
 
     /**
-     * @param null $filename
+     * @param string $filename
      *
-     * @return int
+     * @return string
      */
-    public function save($filename = null)
+    public function saveToFile($filename = null)
     {
-        return file_put_contents(is_null($filename) ? $this->info['name'] . '.torrent' : $filename,
-            Encoder::encode($this));
+        return file_put_contents($filename, Encoder::encode($this));
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function save()
+    {
+        return file_put_contents($this->info['name'] . '.torrent', Encoder::encode($this));
     }
 
     /**

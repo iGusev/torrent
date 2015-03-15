@@ -114,8 +114,9 @@ class Torrent
 
     public static function setMeta($instance, $data = '', $meta = array())
     {
-        if(strlen($data))
+        if (strlen($data)) {
             $meta = array_merge($meta, (array) Decoder::decode_data($data));
+        }
 
         foreach ($meta as $key => $value) {
             $instance->{$key} = $value;
@@ -271,25 +272,28 @@ class Torrent
     }
 
     /**
-     * @param null $precision
      *
      * @return array
      */
-    public function content($precision = null)
+    public function content()
     {
         $files = array();
-        if (isset($this->info['files']) && is_array($this->info['files'])) {
-            foreach ($this->info['files'] as $file) {
-                $files[FileSystem::path($file['path'], $this->info['name'])] = $precision ?
-                    FileSystem::format($file['length'], $precision) :
-                    $file['length'];
+        if ($this->isOneFile()) {
+            $files[$this->info['name']] = $this->info['length'];
+
+        } else {
+            foreach ((array) $this->info['files'] as $file) {
+                $files[FileSystem::path($file['path'], $this->info['name'])] = $file['length'];
             }
-        } elseif (isset($this->info['name'])) {
-            $files[$this->info['name']] = $precision ?
-                FileSystem::format($this->info['length'], $precision) :
-                $this->info['length'];
         }
+
         return $files;
+    }
+
+
+    private function isOneFile()
+    {
+        return isset($this->info['length'], $this->info['name']);
     }
 
     /**
@@ -299,8 +303,15 @@ class Torrent
     {
         $files = array();
         $size = 0;
-        if (isset($this->info['files']) && is_array($this->info['files'])) {
-            foreach ($this->info['files'] as $file) {
+        if ($this->isOneFile()) {
+            $files[$this->info['name']] = array(
+                'startpiece' => 0,
+                'offset' => 0,
+                'size' => $this->info['length'],
+                'endpiece' => floor($this->info['length'] / $this->info['piece length'])
+            );
+        } else {
+            foreach ((array) $this->info['files'] as $file) {
                 $files[FileSystem::path($file['path'], $this->info['name'])] = array(
                     'startpiece' => floor($size / $this->info['piece length']),
                     'offset' => fmod($size, $this->info['piece length']),
@@ -308,14 +319,8 @@ class Torrent
                     'endpiece' => floor($size / $this->info['piece length'])
                 );
             }
-        } elseif (isset($this->info['name'])) {
-            $files[$this->info['name']] = array(
-                'startpiece' => 0,
-                'offset' => 0,
-                'size' => $this->info['length'],
-                'endpiece' => floor($this->info['length'] / $this->info['piece length'])
-            );
         }
+
         return $files;
     }
 
@@ -326,25 +331,18 @@ class Torrent
     public function getSize()
     {
         $size = 0;
-        if (isset($this->info['files']) && is_array($this->info['files'])) {
-            foreach ($this->info['files'] as $file) {
+
+        if ($this->isOneFile()) {
+            return $this->info['length'];
+        } else {
+            foreach ((array) $this->info['files'] as $file) {
                 $size += $file['length'];
             }
-        } elseif (isset($this->info['name'])) {
-            $size = $this->info['length'];
         }
+
         return $size;
     }
 
-    /**
-     * @param null $precision
-     *
-     * @return int|string
-     */
-    public function formattedSize($precision = 2)
-    {
-        return FileSystem::format($this->getSize(), $precision);
-    }
 
     /**
      * @param null $announce

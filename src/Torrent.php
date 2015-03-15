@@ -52,9 +52,6 @@ class Torrent
         if ($piece_length < 32 || $piece_length > 4096) {
             throw new \Exception('Invalid piece lenth, must be between 32 and 4096');
         }
-        if (is_string($meta)) {
-            $meta = array('announce' => $meta);
-        }
         if ($this->build($data, $piece_length * 1024)) {
             $this->touch();
         } else {

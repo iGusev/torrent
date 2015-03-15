@@ -398,9 +398,15 @@ class Torrent
      */
     protected static function decode($string)
     {
-        $data = is_file($string) || FileSystem::url_exists($string) ?
-            self::file_get_contents($string) :
-            $string;
+
+        if (is_file($string)) {
+            $data = file_get_contents($string);
+        } elseif (FileSystem::url_exists($string)) {
+            $data = self::downloadTorrent($string);
+        } else {
+            $data = $string;
+        }
+
         return (array) Decoder::decode_data($data);
     }
 
@@ -598,7 +604,7 @@ class Torrent
     }
 
     /**
-     * @param $file 
+     * @param $file
      *
      * @return bool
      */
@@ -611,44 +617,6 @@ class Torrent
         || $start === 'd13:creatio'
         || substr($start, 0, 7) === 'd4:info'
         || substr($start, 0, 3) === 'd9:';
-    }
-
-    /**
-     * @param $file
-     * @param int $timeout
-     * @param null $offset
-     * @param null $length
-     *
-     * @return bool|mixed|string
-     */
-    public static function file_get_contents($file, $timeout = self::timeout, $offset = null, $length = null)
-    {
-        if (is_file($file) || ini_get('allow_url_fopen')) {
-            $context = !is_file($file) && $timeout ?
-                stream_context_create(array('http' => array('timeout' => $timeout))) :
-                null;
-            return !is_null($offset) ? $length ?
-                @file_get_contents($file, false, $context, $offset, $length) :
-                @file_get_contents($file, false, $context, $offset) :
-                @file_get_contents($file, false, $context);
-        } elseif (!function_exists('curl_init')) {
-            throw new \Exception('Install CURL or enable "allow_url_fopen"');
-        }
-        $handle = curl_init($file);
-        if ($timeout) {
-            curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);
-        }
-        if ($offset || $length) {
-            curl_setopt($handle, CURLOPT_RANGE, $offset . '-' . ($length ? $offset + $length - 1 : null));
-        }
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, 1);
-        $content = curl_exec($handle);
-        $size = curl_getinfo($handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
-        curl_close($handle);
-        return ($offset && $size == -1) || ($length && $length != $size) ? $length ?
-            substr($content, $offset, $length) :
-            substr($content, $offset) :
-            $content;
     }
 
     public static function downloadTorrent($url, $timeout = self::timeout)

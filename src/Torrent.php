@@ -160,15 +160,18 @@ class Torrent
     }
 
     /**
-     * @param null $comment
      *
      * @return null|string
      */
-    public function comment($comment = null)
-    {
-        return is_null($comment) ?
-            isset($this->comment) ? $this->comment : null :
-            $this->touch($this->comment = (string) $comment);
+    public function getComment() {
+        return $this->comment;
+    }
+    /**
+     * @param null $comment
+     *
+     */
+    public function setComment($comment) {
+        $this->touch($this->comment = (string) $comment);
     }
 
     /**

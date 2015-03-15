@@ -65,6 +65,18 @@ class Torrent
         }
     }
 
+    public static function createFromFile($filename, $meta = array())
+    {
+        $instance = new self();
+        $meta = array_merge($meta, (array) Decoder::decode_data(file_get_contents($filename)));
+
+        foreach ($meta as $key => $value) {
+            $instance->{$key} = $value;
+        }
+
+        return $instance;
+    }
+
     /**
      * @return string
      */

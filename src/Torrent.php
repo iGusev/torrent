@@ -650,9 +650,9 @@ class Torrent
     public static function downloadTorrent($url, $timeout = self::timeout)
     {
         if (ini_get('allow_url_fopen')) {
-            return self::downloadViaStream($url);
+            return self::downloadViaStream($url, $timeout);
         } else {
-            return self::downloadViaCurl($url);
+            return self::downloadViaCurl($url, $timeout);
         }
     }
 

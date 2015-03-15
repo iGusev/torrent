@@ -79,7 +79,8 @@ class Torrent
         return self::setMeta(self::downloadTorrent($url), $meta);
     }
 
-    public static function setMeta($data, $addMeta = array()) {
+    public static function setMeta($data, $addMeta = array())
+    {
         $instance = new self();
         $meta = array_merge($addMeta, (array) Decoder::decode_data($data));
 
@@ -417,11 +418,14 @@ class Torrent
             return $this->info = $this->files($data, $piece_length);
         } elseif (is_dir($data)) {
             return $this->info = $this->folder($data, $piece_length);
-        } elseif ((is_file($data) || FileSystem::url_exists($data)) && !self::is_torrent($data)) {
+        } elseif (
+            (is_file($data) && !self::is_torrent(file_get_contents($data)))
+            || (FileSystem::url_exists($data) && !self::is_torrent(self::downloadTorrent($data)))
+        ) {
             return $this->info = $this->file($data, $piece_length);
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -599,14 +603,15 @@ class Torrent
      *
      * @return bool
      */
-    public static function is_torrent($file, $timeout = self::timeout)
+    public static function is_torrent($file)
     {
-        return ($start = self::file_get_contents($file, $timeout, 0, 11))
-        && $start === 'd8:announce'
+        $start = substr($file, 0, 11);
+
+        return $start === 'd8:announce'
         || $start === 'd10:created'
         || $start === 'd13:creatio'
         || substr($start, 0, 7) === 'd4:info'
-        || substr($start, 0, 3) === 'd9:'; // @see https://github.com/adriengibrat/torrent-rw/pull/17
+        || substr($start, 0, 3) === 'd9:';
     }
 
     /**

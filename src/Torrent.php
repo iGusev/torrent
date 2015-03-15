@@ -13,21 +13,6 @@ use League\Torrent\Helper\FileSystem;
  */
 class Torrent
 {
-
-    /**
-     *
-     * @var int
-     */
-    const timeout = 30;
-
-    /**
-     * List of strings that can start a torrent file
-     *
-     * @static
-     * @var array
-     */
-    protected static $torrentsChecks = array('d8:announce', 'd10:created', 'd13:creatio', 'd4:info', 'd9:');
-
     /**
      * Optional comment
      *
@@ -76,7 +61,7 @@ class Torrent
         if ($this->build($data, $piece_length * 1024)) {
             $this->touch();
         } else {
-            $meta = array_merge($meta, $this->decode($data));
+            $meta = array_merge($meta, Decoder::decode($data));
         }
         foreach ($meta as $key => $value) {
             $this->{$key} = $value;
@@ -94,7 +79,7 @@ class Torrent
             throw new \InvalidArgumentException('Url is not valud');
         }
 
-        return self::setMeta(new self(), self::downloadTorrent($url), $meta);
+        return self::setMeta(new self(), FileSystem::downloadTorrent($url), $meta);
     }
 
     public static function createFromFilesList(array $list, $meta = array())
@@ -329,7 +314,7 @@ class Torrent
      *
      * @return array|bool
      */
-    public function scrape($announce = null, $hash_info = null, $timeout = self::timeout)
+    public function scrape($announce = null, $hash_info = null, $timeout = FileSystem::timeout)
     {
         $packed_hash = urlencode(pack('H*', $hash_info ? $hash_info : $this->hash_info()));
         $handles = $scrape = array();
@@ -420,24 +405,6 @@ class Torrent
         );
     }
 
-    /**
-     * @param $string
-     *
-     * @return array
-     */
-    protected static function decode($string)
-    {
-
-        if (is_file($string)) {
-            $data = file_get_contents($string);
-        } elseif (FileSystem::url_exists($string)) {
-            $data = self::downloadTorrent($string);
-        } else {
-            $data = $string;
-        }
-
-        return (array) Decoder::decode_data($data);
-    }
 
     /**
      * @param $data
@@ -454,8 +421,8 @@ class Torrent
         } elseif (is_dir($data)) {
             return $this->info = $this->folder($data, $piece_length);
         } elseif (
-            (is_file($data) && !self::isTorrent(file_get_contents($data)))
-            || (FileSystem::url_exists($data) && !self::isTorrent(self::downloadTorrent($data)))
+            (is_file($data) && !FileSystem::isTorrent(file_get_contents($data)))
+            || (FileSystem::url_exists($data) && !FileSystem::isTorrent(FileSystem::downloadTorrent($data)))
         ) {
             return $this->info = $this->file($data, $piece_length);
         }
@@ -470,8 +437,8 @@ class Torrent
      */
     protected function touch($void = null)
     {
-        $this->{'created by'} = 'Torrent RW PHP Class - http://github.com/adriengibrat/torrent-rw';
-        $this->{'creation date'} = time();
+        $this->createdBy = 'League\Torrent Class - http://github.com/iGusev/torrent';
+        $this->creationDate = time();
         return $void;
     }
 
@@ -621,55 +588,5 @@ class Torrent
         }
     }
 
-    /**
-     * @param $file
-     *
-     * @return bool
-     */
-    public static function isTorrent($file)
-    {
-        $start = substr($file, 0, 11);
-        $check = false;
-        foreach (self::$torrentsChecks as $value) {
-            if (0 === strpos($start, $value)) {
-                $check = true;
-                continue;
-            }
-        }
 
-        return $check;
-    }
-
-    public static function downloadTorrent($url, $timeout = self::timeout)
-    {
-        if (ini_get('allow_url_fopen')) {
-            return self::downloadViaStream($url, $timeout);
-        } else {
-            return self::downloadViaCurl($url, $timeout);
-        }
-    }
-
-    public static function downloadViaStream($url, $timeout = self::timeout)
-    {
-        if (!ini_get('allow_url_fopen')) {
-            throw new \Exception('Install CURL or enable "allow_url_fopen"');
-        }
-
-        return file_get_contents($url, false, stream_context_create(array('http' => array('timeout' => $timeout))));
-    }
-
-    public static function downloadViaCurl($url, $timeout = self::timeout)
-    {
-        if (!function_exists('curl_init')) {
-            throw new \Exception('Install CURL or enable "allow_url_fopen"');
-        }
-        $handle = curl_init($url);
-        if ($timeout) {
-            curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);
-        }
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, 1);
-        $content = curl_exec($handle);
-        curl_close($handle);
-        return $content;
-    }
 }

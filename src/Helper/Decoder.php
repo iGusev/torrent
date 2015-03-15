@@ -134,4 +134,23 @@ class Decoder
         $data = substr($data, $end + 1);
         return 0 + $integer;
     }
+
+    /**
+     * @param $string
+     *
+     * @return array
+     */
+    public static function decode($string)
+    {
+
+        if (is_file($string)) {
+            $data = file_get_contents($string);
+        } elseif (FileSystem::url_exists($string)) {
+            $data = FileSystem::downloadTorrent($string);
+        } else {
+            $data = $string;
+        }
+
+        return (array) Decoder::decode_data($data);
+    }
 }

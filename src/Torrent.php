@@ -320,11 +320,10 @@ class Torrent
     }
 
     /**
-     * @param null $precision
      *
-     * @return int|string
+     * @return int
      */
-    public function size($precision = null)
+    public function getSize()
     {
         $size = 0;
         if (isset($this->info['files']) && is_array($this->info['files'])) {
@@ -334,9 +333,17 @@ class Torrent
         } elseif (isset($this->info['name'])) {
             $size = $this->info['length'];
         }
-        return is_null($precision) ?
-            $size :
-            FileSystem::format($size, $precision);
+        return $size;
+    }
+
+    /**
+     * @param null $precision
+     *
+     * @return int|string
+     */
+    public function formattedSize($precision = 2)
+    {
+        return FileSystem::format($this->getSize(), $precision);
     }
 
     /**
@@ -434,7 +441,7 @@ class Torrent
             $ampersand,
             $this->hash_info(),
             urlencode($this->getName()),
-            $this->size(),
+            $this->getSize(),
             implode($ampersand . 'tr=', FileSystem::untier($this->announce()))
         );
     }

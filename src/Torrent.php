@@ -67,33 +67,21 @@ class Torrent
 
     public static function createFromFile($filename, $meta = array())
     {
-        $instance = new self();
-        $data = file_get_contents($filename);
-
-        $meta = array_merge($meta, (array) Decoder::decode_data($data));
-
-        foreach ($meta as $key => $value) {
-            $instance->{$key} = $value;
-        }
-
-        return $instance;
+        return self::setMeta(file_get_contents($filename), $meta);
     }
 
     public static function createFromUrl($url, $meta = array())
     {
-        if (!ini_get('allow_url_fopen')) {
-            if (!function_exists('curl_init')) {
-                throw new \Exception('Install CURL or enable "allow_url_fopen"');
-            } else {
-                $data = self::downloadViaCurl($url);
-            }
-        } else {
-            $data = self::downloadViaCurl($url);
+        if (!FileSystem::url_exists($url)) {
+            throw new \InvalidArgumentException('Url is not valud');
         }
 
-        $instance = new self();
+        return self::setMeta(self::downloadTorrent($url), $meta);
+    }
 
-        $meta = array_merge($meta, (array) Decoder::decode_data($data));
+    public static function setMeta($data, $addMeta = array()) {
+        $instance = new self();
+        $meta = array_merge($addMeta, (array) Decoder::decode_data($data));
 
         foreach ($meta as $key => $value) {
             $instance->{$key} = $value;
@@ -659,13 +647,29 @@ class Torrent
             $content;
     }
 
+    public static function downloadTorrent($url, $timeout = self::timeout)
+    {
+        if (ini_get('allow_url_fopen')) {
+            return self::downloadViaStream($url);
+        } else {
+            return self::downloadViaCurl($url);
+        }
+    }
+
     public static function downloadViaStream($url, $timeout = self::timeout)
     {
+        if (!ini_get('allow_url_fopen')) {
+            throw new \Exception('Install CURL or enable "allow_url_fopen"');
+        }
+
         return file_get_contents($url, false, stream_context_create(array('http' => array('timeout' => $timeout))));
     }
 
     public static function downloadViaCurl($url, $timeout = self::timeout)
     {
+        if (!function_exists('curl_init')) {
+            throw new \Exception('Install CURL or enable "allow_url_fopen"');
+        }
         $handle = curl_init($url);
         if ($timeout) {
             curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);

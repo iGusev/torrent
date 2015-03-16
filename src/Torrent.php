@@ -110,7 +110,7 @@ class Torrent
      */
     public function __toString()
     {
-        return Encoder::encodeObject($this);
+        return Encoder::encode(get_object_vars($this));
     }
 
     /**
@@ -232,9 +232,7 @@ class Torrent
      */
     public function hash_info()
     {
-        return isset($this->info) ?
-            sha1(Encoder::encodeArray($this->info)) :
-            null;
+        return isset($this->info) ? sha1(Encoder::encode($this->info)) : null;
     }
 
     /**
@@ -378,7 +376,7 @@ class Torrent
      */
     public function saveToFile($filename = null)
     {
-        return file_put_contents($filename, Encoder::encodeObject($this));
+        return file_put_contents($filename, Encoder::encode(get_object_vars($this)));
     }
 
     /**
@@ -387,7 +385,7 @@ class Torrent
      */
     public function save()
     {
-        return file_put_contents($this->info['name'] . '.torrent', Encoder::encodeObject($this));
+        return file_put_contents($this->info['name'] . '.torrent', Encoder::encode(get_object_vars($this)));
     }
 
     /**

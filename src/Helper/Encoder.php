@@ -7,13 +7,24 @@ use League\Torrent\Torrent;
 class Encoder
 {
     /**
-     * @param $object
+     * @param $mixed
      *
      * @return string
      */
-    public static function encodeObject($object)
+    public static function encode($mixed)
     {
-        return self::encodeArray(get_object_vars($object));
+        $type = gettype($mixed);
+        if (is_numeric($mixed)) {
+            return self::encodeInteger($mixed);
+        }
+        if ($type == 'array') {
+            return self::encodeArray($mixed);
+        }
+        if (is_string($mixed)) {
+            return self::encodeString((string) $mixed);
+        }
+
+        throw new InvalidArgumentException('Variables of type ' . gettype($mixed) . ' can not be encoded.');
     }
 
     /**

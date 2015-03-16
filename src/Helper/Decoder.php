@@ -48,21 +48,9 @@ class Decoder
         $dictionary = array();
         $previous = null;
         while (($char = FileSystem::char($data)) != 'e') {
-            if ($char === false) {
-                throw new \Exception('Unterminated dictionary');
-            }
-            if (!ctype_digit($char)) {
-                throw new \Exception('Invalid dictionary key');
-            }
             $key = self::decode_string($data);
-            if (isset($dictionary[$key])) {
-                throw new \Exception('Duplicate dictionary key');
-            }
-            if ($key < $previous) {
-                throw new \Exception('Missorted dictionary key');
-            }
+
             $dictionary[$key] = self::decode_data($data);
-            $previous = $key;
         }
         $data = substr($data, 1);
         return $dictionary;
@@ -77,10 +65,6 @@ class Decoder
     {
         $list = array();
         while (($char = FileSystem::char($data)) != 'e') {
-            if ($char === false) {
-                throw new Exception('Unterminated list');
-            }
-
             $list[] = self::decode_data($data);
         }
         $data = substr($data, 1);
@@ -94,16 +78,9 @@ class Decoder
      */
     public static function decode_string(& $data)
     {
-        if (FileSystem::char($data) === '0' && substr($data, 1, 1) != ':') {
-            throw new Exception('Invalid string length, leading zero');
-        }
-        if (!$colon = @strpos($data, ':')) {
-            throw new Exception('Invalid string length, colon not found');
-        }
+        $colon = strpos($data, ':');
         $length = intval(substr($data, 0, $colon));
-        if ($length + $colon + 1 > strlen($data)) {
-            throw new Exception('Invalid string, input too short for string length');
-        }
+
         $string = substr($data, $colon + 1, $length);
         $data = substr($data, $colon + $length + 1);
         return $string;
@@ -121,12 +98,6 @@ class Decoder
         if (FileSystem::char($data) == '-') {
             $start++;
         }
-        if (substr($data, $start, 1) == '0' && $end > $start + 1) {
-            throw new Exception('Leading zero in integer');
-        }
-        if (!ctype_digit(substr($data, $start, $start ? $end - 1 : $end))) {
-            throw new Exception('Non-digit characters in integer');
-        }
         $integer = substr($data, 0, $end);
         $data = substr($data, $end + 1);
         return 0 + $integer;
@@ -139,7 +110,6 @@ class Decoder
      */
     public static function decode($string)
     {
-
         if (is_file($string)) {
             $data = file_get_contents($string);
         } elseif (FileSystem::url_exists($string)) {

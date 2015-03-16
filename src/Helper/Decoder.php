@@ -118,9 +118,6 @@ class Decoder
     {
         $start = 0;
         $end = strpos($data, 'e');
-        if ($end === 0) {
-            throw new Exception('Empty integer');
-        }
         if (FileSystem::char($data) == '-') {
             $start++;
         }

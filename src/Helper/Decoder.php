@@ -13,6 +13,12 @@ namespace League\Torrent\Helper;
 
 use League\Torrent\Torrent;
 
+/**
+ * Class Decoder
+ *
+ * @todo: validations for decoders
+ * @package League\Torrent\Helper
+ */
 class Decoder
 {
 
@@ -26,15 +32,15 @@ class Decoder
         switch (FileSystem::char($data)) {
             case 'i':
                 $data = substr($data, 1);
-                return self::decode_integer($data);
+                return self::decodeInteger($data);
             case 'l':
                 $data = substr($data, 1);
-                return self::decode_list($data);
+                return self::decodeList($data);
             case 'd':
                 $data = substr($data, 1);
-                return self::decode_dictionary($data);
+                return self::decodeDictionary($data);
             default:
-                return self::decode_string($data);
+                return self::decodeString($data);
         }
     }
 
@@ -43,7 +49,7 @@ class Decoder
      *
      * @return array|bool
      */
-    public static function decode_dictionary(& $data)
+    public static function decodeDictionary(& $data)
     {
         $dictionary = array();
         $previous = null;
@@ -61,7 +67,7 @@ class Decoder
      *
      * @return array|bool
      */
-    public static function decode_list(& $data)
+    public static function decodeList(& $data)
     {
         $list = array();
         while (($char = FileSystem::char($data)) != 'e') {
@@ -76,7 +82,7 @@ class Decoder
      *
      * @return bool|string
      */
-    public static function decode_string(& $data)
+    public static function decodeString(& $data)
     {
         $colon = strpos($data, ':');
         $length = intval(substr($data, 0, $colon));
@@ -91,7 +97,7 @@ class Decoder
      *
      * @return int
      */
-    public static function decode_integer(& $data)
+    public static function decodeInteger(& $data)
     {
         $start = 0;
         $end = strpos($data, 'e');

@@ -52,7 +52,6 @@ class Decoder
     public static function decodeDictionary(& $data)
     {
         $dictionary = array();
-        $previous = null;
         while (($char = FileSystem::char($data)) != 'e') {
             $key = self::decodeString($data);
 

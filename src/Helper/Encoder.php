@@ -17,13 +17,13 @@ class Encoder
         switch (gettype($mixed)) {
             case 'integer':
             case 'double':
-                return self::encode_integer($mixed);
+                return self::encodeInteger($mixed);
             case 'object':
-                $mixed = get_object_vars($mixed);
+                return self::encodeArray(get_object_vars($mixed));
             case 'array':
-                return self::encode_array($mixed);
+                return self::encodeArray($mixed);
             default:
-                return self::encode_string((string) $mixed);
+                return self::encodeString((string) $mixed);
         }
     }
 
@@ -32,7 +32,7 @@ class Encoder
      *
      * @return string
      */
-    public static function encode_string($string)
+    public static function encodeString($string)
     {
         return strlen($string) . ':' . $string;
     }
@@ -42,7 +42,7 @@ class Encoder
      *
      * @return string
      */
-    public static function encode_integer($integer)
+    public static function encodeInteger($integer)
     {
         return 'i' . $integer . 'e';
     }
@@ -52,7 +52,7 @@ class Encoder
      *
      * @return string
      */
-    public static function encode_array($array)
+    public static function encodeArray($array)
     {
         if (FileSystem::is_list($array)) {
             $return = 'l';

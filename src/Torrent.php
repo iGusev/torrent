@@ -95,7 +95,7 @@ class Torrent
     public static function setMeta($instance, $data = '', $meta = array())
     {
         if (strlen($data)) {
-            $meta = array_merge($meta, (array) Decoder::decode_data($data));
+            $meta = array_merge($meta, (array) Decoder::decodeData($data));
         }
 
         foreach ($meta as $key => $value) {
@@ -357,7 +357,7 @@ class Torrent
                     continue;
                 }
                 $data = curl_multi_getcontent($done['handle']);
-                $stats = Decoder::decode_data($data);
+                $stats = Decoder::decodeData($data);
                 curl_multi_remove_handle($curl, $done['handle']);
                 $scrape[$tracker] = empty($stats['files']) ?
                     'Empty scrape data' :

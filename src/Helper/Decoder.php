@@ -27,7 +27,7 @@ class Decoder
      *
      * @return array|bool|int|string
      */
-    public static function decode_data(& $data)
+    public static function decodeData(& $data)
     {
         switch (FileSystem::char($data)) {
             case 'i':
@@ -54,9 +54,9 @@ class Decoder
         $dictionary = array();
         $previous = null;
         while (($char = FileSystem::char($data)) != 'e') {
-            $key = self::decode_string($data);
+            $key = self::decodeString($data);
 
-            $dictionary[$key] = self::decode_data($data);
+            $dictionary[$key] = self::decodeData($data);
         }
         $data = substr($data, 1);
         return $dictionary;
@@ -71,7 +71,7 @@ class Decoder
     {
         $list = array();
         while (($char = FileSystem::char($data)) != 'e') {
-            $list[] = self::decode_data($data);
+            $list[] = self::decodeData($data);
         }
         $data = substr($data, 1);
         return $list;
@@ -124,6 +124,6 @@ class Decoder
             $data = $string;
         }
 
-        return (array) Decoder::decode_data($data);
+        return (array) Decoder::decodeData($data);
     }
 }

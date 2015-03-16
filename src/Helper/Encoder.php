@@ -6,25 +6,14 @@ use League\Torrent\Torrent;
 
 class Encoder
 {
-
     /**
-     * @param $mixed
+     * @param $object
      *
      * @return string
      */
-    public static function encode($mixed)
+    public static function encodeObject($object)
     {
-        switch (gettype($mixed)) {
-            case 'integer':
-            case 'double':
-                return self::encodeInteger($mixed);
-            case 'object':
-                return self::encodeArray(get_object_vars($mixed));
-            case 'array':
-                return self::encodeArray($mixed);
-            default:
-                return self::encodeString((string) $mixed);
-        }
+        return self::encodeArray(get_object_vars($object));
     }
 
     /**

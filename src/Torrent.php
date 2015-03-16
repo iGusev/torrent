@@ -500,18 +500,16 @@ class Torrent
      */
     private function file($file, $piece_length)
     {
-        if (!$handle = self::fopen($file, $size = FileSystem::filesize($file))) {
-            throw new \Exception('Failed to open file: "' . $file . '"');
-        }
+
         if (FileSystem::is_url($file)) {
             $this->url_list($file);
         }
         $path = explode(DIRECTORY_SEPARATOR, $file);
         return array(
-            'length' => $size,
+            'length' => FileSystem::filesize($file),
             'name' => end($path),
             'piece length' => $piece_length,
-            'pieces' => $this->pieces($handle, $piece_length)
+            'pieces' => $this->pieces(self::fopen($file), $piece_length)
         );
     }
 
@@ -542,12 +540,9 @@ class Torrent
             if ($path != array_intersect_assoc($file_path = explode(DIRECTORY_SEPARATOR, $file), $path)) {
                 throw new \Exception('Files must be in the same folder: "' . $file . '" discarded');
             }
-            if (!$handle = self::fopen($file, $filesize = FileSystem::filesize($file))) {
-                throw new \Exception('Failed to open file: "' . $file . '" discarded');
-            }
-            $pieces .= $this->pieces($handle, $piece_length, $count == $i);
+            $pieces .= $this->pieces(self::fopen($file), $piece_length, $count == $i);
             $info_files[] = array(
-                'length' => $filesize,
+                'length' => FileSystem::filesize($file),
                 'path' => array_values(array_diff($file_path, $path))
             );
         }
@@ -571,22 +566,17 @@ class Torrent
     }
 
     /**
-     * @param $file
-     * @param null $size
+     * @param $filename
      *
      * @return bool|resource
      */
-    public static function fopen($file, $size = null)
+    public static function fopen($filename)
     {
-        if ((is_null($size) ? FileSystem::filesize($file) : $size) <= 2 * pow(1024, 3)) {
-            return fopen($file, 'r');
-        } elseif (PHP_OS != 'Linux') {
-            throw new \Exception('File size is greater than 2GB. This is only supported under Linux');
-        } elseif (!is_readable($file)) {
-            return false;
-        } else {
-            return popen('cat ' . escapeshellarg(realpath($file)), 'r');
+        if (!$handle = fopen($filename, 'r')) {
+            throw new \Exception('Failed to open file: "' . $filename . '"');
         }
+
+        return $handle;
     }
 
 

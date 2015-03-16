@@ -3,6 +3,7 @@
 namespace League\Torrent\Helper;
 
 use League\Torrent\Torrent;
+use \InvalidArgumentException;
 
 class Encoder
 {
@@ -13,14 +14,13 @@ class Encoder
      */
     public static function encode($mixed)
     {
-        $type = gettype($mixed);
         if (is_numeric($mixed)) {
             return self::encodeInteger($mixed);
         }
-        if ($type == 'array') {
+        if (is_array($mixed)) {
             return self::encodeArray($mixed);
         }
-        if (is_string($mixed)) {
+        if (is_string($mixed) || is_null($mixed)) {
             return self::encodeString((string) $mixed);
         }
 

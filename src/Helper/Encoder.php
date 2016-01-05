@@ -2,7 +2,6 @@
 
 namespace League\Torrent\Helper;
 
-use League\Torrent\Torrent;
 use \InvalidArgumentException;
 
 class Encoder

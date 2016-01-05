@@ -49,6 +49,8 @@ class Torrent
      * @param null $data
      * @param array $meta
      * @param int $piece_length
+     *
+     * @throws \Exception
      */
     public function __construct($data = null, $meta = array(), $piece_length = 256)
     {
@@ -186,7 +188,7 @@ class Torrent
      *
      * @return bool|null
      */
-    public function is_private($private = null)
+    public function isPrivate($private = null)
     {
         return is_null($private) ?
             !empty($this->info['private']) :
@@ -314,6 +316,8 @@ class Torrent
      * @param int $timeout
      *
      * @return array|bool
+     *
+     * @throws \Exception
      */
     public function scrape($announce = null, $hash_info = null, $timeout = FileSystem::timeout)
     {
@@ -473,6 +477,8 @@ class Torrent
      * @param bool $last
      *
      * @return bool|string
+     *
+     * @throws \Exception
      */
     private function pieces($handle, $piece_length, $last = true)
     {
@@ -518,6 +524,8 @@ class Torrent
      * @param $piece_length
      *
      * @return array
+     *
+     * @throws \Exception
      */
     private function files($files, $piece_length)
     {
@@ -569,6 +577,8 @@ class Torrent
      * @param $filename
      *
      * @return bool|resource
+     *
+     * @throws \Exception
      */
     public static function fopen($filename)
     {

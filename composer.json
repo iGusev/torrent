@@ -5,7 +5,7 @@
         "league",
         "league/torrent"
     ],
-    "homepage": "https://github.com/thephpleague/torrent",
+    "homepage": "https://github.com/iGusev/torrent",
     "license": "MIT",
     "authors": [
         {
@@ -36,5 +36,8 @@
         "branch-alias": {
             "dev-master": "1.0-dev"
         }
+    },
+    "scripts": {
+        "test": "phpunit"
     }
 }

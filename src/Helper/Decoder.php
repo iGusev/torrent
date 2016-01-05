@@ -11,7 +11,6 @@
 
 namespace League\Torrent\Helper;
 
-use League\Torrent\Torrent;
 
 /**
  * Class Decoder
@@ -103,7 +102,7 @@ class Decoder
         if (FileSystem::char($data) == '-') {
             $start++;
         }
-        $integer = substr($data, 0, $end);
+        $integer = (int) substr($data, 0, $end);
         $data = substr($data, $end + 1);
         return 0 + $integer;
     }

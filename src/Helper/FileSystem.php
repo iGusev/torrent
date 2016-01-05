@@ -2,8 +2,6 @@
 
 namespace League\Torrent\Helper;
 
-use League\Torrent\Torrent;
-
 class FileSystem
 {
     /**

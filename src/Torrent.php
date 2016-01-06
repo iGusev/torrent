@@ -200,7 +200,7 @@ class Torrent
      *
      * @return null
      */
-    public function url_list($urls = null)
+    public function urlList($urls = null)
     {
         return is_null($urls) ?
             isset($this->{'url-list'}) ? $this->{'url-list'} : null :
@@ -212,7 +212,7 @@ class Torrent
      *
      * @return null
      */
-    public function httpseeds($urls = null)
+    public function httpSeeds($urls = null)
     {
         return is_null($urls) ?
             isset($this->httpseeds) ? $this->httpseeds : null :
@@ -504,11 +504,11 @@ class Torrent
      *
      * @return array|bool
      */
-    private function file($file, $piece_length)
+    protected function file($file, $piece_length)
     {
 
         if (FileSystem::is_url($file)) {
-            $this->url_list($file);
+            $this->urlList($file);
         }
         $path = explode(DIRECTORY_SEPARATOR, $file);
         return array(
@@ -527,7 +527,7 @@ class Torrent
      *
      * @throws Exception
      */
-    private function files($files, $piece_length)
+    protected function files($files, $piece_length)
     {
         if (!FileSystem::is_url(current($files))) {
             $files = array_map('realpath', $files);
@@ -538,7 +538,7 @@ class Torrent
         $first = current($files);
         $root = dirname($first);
         if ($url = FileSystem::is_url($first)) {
-            $this->url_list(dirname($root) . DIRECTORY_SEPARATOR);
+            $this->urlList(dirname($root) . DIRECTORY_SEPARATOR);
         }
         $path = explode(DIRECTORY_SEPARATOR, dirname($url ? $first : realpath($first)));
         $pieces = null;
@@ -568,7 +568,7 @@ class Torrent
      *
      * @return array
      */
-    private function folder($dir, $piece_length)
+    protected function folder($dir, $piece_length)
     {
         return $this->files(FileSystem::scandir($dir), $piece_length);
     }

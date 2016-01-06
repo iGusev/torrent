@@ -50,7 +50,7 @@ class Torrent
      * @param array $meta
      * @param int $piece_length
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct($data = null, $meta = array(), $piece_length = 256)
     {
@@ -58,7 +58,7 @@ class Torrent
             return false;
         }
         if ($piece_length < 32 || $piece_length > 4096) {
-            throw new \Exception('Invalid piece lenth, must be between 32 and 4096');
+            throw new Exception('Invalid piece lenth, must be between 32 and 4096');
         }
         if ($this->build($data, $piece_length * 1024)) {
             $this->touch();
@@ -317,14 +317,14 @@ class Torrent
      *
      * @return array|bool
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function scrape($announce = null, $hash_info = null, $timeout = FileSystem::timeout)
     {
         $packed_hash = urlencode(pack('H*', $hash_info ? $hash_info : $this->hash_info()));
         $handles = $scrape = array();
         if (!function_exists('curl_multi_init')) {
-            throw new \Exception('Install CURL with "curl_multi_init" enabled');
+            throw new Exception('Install CURL with "curl_multi_init" enabled');
         }
         $curl = curl_multi_init();
         foreach ((array) ($announce ? $announce : $this->announce()) as $tier) {
@@ -478,7 +478,7 @@ class Torrent
      *
      * @return bool|string
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function pieces($handle, $piece_length, $last = true)
     {
@@ -491,7 +491,7 @@ class Torrent
             if (($length = strlen($piece .= fread($handle, $length))) == $piece_length) {
                 $pieces .= FileSystem::pack($piece);
             } elseif (($length = $piece_length - $length) < 0) {
-                throw new \Exception('Invalid piece length!');
+                throw new Exception('Invalid piece length!');
             }
         }
         fclose($handle);
@@ -525,7 +525,7 @@ class Torrent
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function files($files, $piece_length)
     {
@@ -546,7 +546,7 @@ class Torrent
         $count = count($files) - 1;
         foreach ($files as $i => $file) {
             if ($path != array_intersect_assoc($file_path = explode(DIRECTORY_SEPARATOR, $file), $path)) {
-                throw new \Exception('Files must be in the same folder: "' . $file . '" discarded');
+                throw new Exception('Files must be in the same folder: "' . $file . '" discarded');
             }
             $pieces .= $this->pieces(self::fopen($file), $piece_length, $count == $i);
             $info_files[] = array(
@@ -578,12 +578,12 @@ class Torrent
      *
      * @return bool|resource
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public static function fopen($filename)
     {
         if (!$handle = fopen($filename, 'r')) {
-            throw new \Exception('Failed to open file: "' . $filename . '"');
+            throw new Exception('Failed to open file: "' . $filename . '"');
         }
 
         return $handle;
